@@ -14,6 +14,7 @@ ICU的官方地址是：http://site.icu-project.org/
 ~/android/external/icu/icu4c/source/# make INCLUDE_UNI_CORE_DATA=1
 替换dat文件：
 ~/android/external/icu/icu4c/source/# cp -rf data/out/tmp/icudt58l.dat stubdata/
+生成新的系统镜像：
 ~/android/# make clean
 ~/android/# make -j8
 ```
