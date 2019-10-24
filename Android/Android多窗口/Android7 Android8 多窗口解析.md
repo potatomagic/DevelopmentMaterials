@@ -7,6 +7,7 @@ Android系统多窗口主要有三种模式，实现多窗口的核心思想是�
 ## 栈
 Android原生多窗口是多Stack方案，即存在多个ActivityStack。ActivityStack是一个抽象的栈，每个栈都有自己的屏幕区域bound和id，Activity是以Task方式组织并放在某一个Stack中的。所以启动一个Activity之后，必定会将此Activity存放于某一个Stack。关于Stack ID种类代码在/frameworks/base/core/java/android/app/ActivityManager.java的内部类StackId中
 ``` java
+public static class StackId {
     /** Invalid stack ID. */
     /** 无效的Stack ID */
     public static final int INVALID_STACK_ID = -1;
@@ -46,6 +47,7 @@ Android原生多窗口是多Stack方案，即存在多个ActivityStack。Activit
     /** Last static stack stack ID. */
     /** 结束值 */
     public static final int LAST_STATIC_STACK_ID = ASSISTANT_STACK_ID;
+}
 ```
 
 ## 栈边界
@@ -98,32 +100,32 @@ frameworks/base/packages/SystemUI/src/com/android/systemui/stackdivider/
 #### Stack ID
 前面已经提到了自由模式的Stack ID是FREEFORM_WORKSPACE_STACK_ID，另外AMS也提供了API可以使Task在不同的stack中移动
 ``` java
-    @Override
-    public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "moveTaskToStack()");
-        if (StackId.isHomeOrRecentsStack(stackId)) {
-            throw new IllegalArgumentException("moveTaskToStack: Attempt to move task " + taskId + " to stack " + stackId);
-        }
-        synchronized (this) {
-            long ident = Binder.clearCallingIdentity();
-            try {
-                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
-                if (task == null) {
-                    return;
-                }
-                if (stackId == DOCKED_STACK_ID) {
-                    mWindowManager.setDockedStackCreateState(DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, null /* initialBounds */);
-                }
-                task.reparent(stackId, toTop, REPARENT_KEEP_STACK_AT_FRONT, ANIMATE, !DEFER_RESUME, "moveTaskToStack");
-            } finally {
-                Binder.restoreCallingIdentity(ident);
+@Override
+public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
+    enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "moveTaskToStack()");
+    if (StackId.isHomeOrRecentsStack(stackId)) {
+        throw new IllegalArgumentException("moveTaskToStack: Attempt to move task " + taskId + " to stack " + stackId);
+    }
+    synchronized (this) {
+        long ident = Binder.clearCallingIdentity();
+        try {
+            final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+            if (task == null) {
+                return;
             }
+            if (stackId == DOCKED_STACK_ID) {
+                mWindowManager.setDockedStackCreateState(DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, null /* initialBounds */);
+            }
+            task.reparent(stackId, toTop, REPARENT_KEEP_STACK_AT_FRONT, ANIMATE, !DEFER_RESUME, "moveTaskToStack");
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
+}
 ```
 
 #### 窗口添加的layout——DecorCaptionView
-窗口模式和正常模式相比，是DecoreView下面多了一个DecorCaptionView，DecorCaptionView的创建过程和正常setContentView类似，在创建的过程中，会判断当前的Stack id是不是Freeform Stack ID。如果不是，那么就不创建DecorCaptionView，具体代码在DecorView中：
+窗口模式和正常模式相比，是DecoreView下面多了一个DecorCaptionView，DecorCaptionView的创建过程和正常setContentView类似，在创建的过程中，会判断当前的Stack ID是不是Freeform Stack ID。如果不是，那么就不创建DecorCaptionView，具体代码在DecorView中：
 ```java
 private DecorCaptionView createDecorCaptionView(LayoutInflater inflater) {
    DecorCaptionView decorCaptionView = null;
@@ -140,8 +142,7 @@ private DecorCaptionView createDecorCaptionView(LayoutInflater inflater) {
            attrs.type == TYPE_APPLICATION || attrs.type == TYPE_DRAWN_APPLICATION;
    // Only a non floating application window on one of the allowed workspaces can get a caption
    if (!mWindow.isFloating() && isApplication && StackId.hasWindowDecor(mStackId)) {
-       // Dependent on the brightness of the used title we either use the
-       // dark or the light button frame.
+       // Dependent on the brightness of the used title we either use the dark or the light button frame.
        if (decorCaptionView == null) {
            decorCaptionView = inflateDecorCaptionView(inflater);
        }
@@ -154,7 +155,7 @@ private DecorCaptionView createDecorCaptionView(LayoutInflater inflater) {
    return decorCaptionView;
 }
 ```
-
+DecorCaptionView使用的布局文件是
 framework/base/core/res/res/layout/decor_caption.xml
 ```xml
 <com.android.internal.widget.DecorCaptionView xmlns:android="http://schemas.android.com/apk/res/android"
@@ -202,9 +203,6 @@ DecorCaptionView通过两个Callback将关闭和退出的操作转发给Activity
 ![窗口移动](img/窗口移动.png)
 窗口的缩放，AOSP默认支持横向/纵向/对角三种拉伸方式，窗口缩放与窗口移动一样由TaskPositioner处理，整个流程与remove类似。由于窗口缩放后，config发生变化，对于某些采用sw/ w/ h/resolution等定义的资源有影响，可能会触发重新加载资源。
 ![窗口缩放](img/窗口缩放.png)
-https://blog.csdn.net/CodeFarmer__/article/details/102651042
-https://blog.csdn.net/jiangnan2222/article/details/82655340
-https://blog.csdn.net/freekiteyu/article/details/79318031
 
 #### Focus Activity
 无论Activity如何切换总有一个Focus Activity，在WindowManagerService中对应有一个AppWindowToken类型的mFocusedApp变量，每次focus Activity更新后均会调用WindowManagerService.setFocusTaskRegionLocked()将Focus Activity所在Task的bound更新到TaskTapPointerEventListener.mTouchExcludeRegion中。
