@@ -4,8 +4,8 @@ Android系统多窗口主要有三种模式，实现多窗口的核心思想是�
 - Freeform Mode 自由模式：类似于Windows的窗口模式。
 - Picture In Picture Mode：画中画模式（PIP）。
 
-## 栈
-Android原生多窗口是多Stack方案，即存在多个ActivityStack。ActivityStack是一个抽象的栈，每个栈都有自己的屏幕区域bound和id，Activity是以Task方式组织并放在某一个Stack中的。所以启动一个Activity之后，必定会将此Activity存放于某一个Stack。关于Stack ID种类代码在/frameworks/base/core/java/android/app/ActivityManager.java的内部类StackId中
+## 栈 Stack
+Android原生多窗口是多Stack方案，即存在多个ActivityStack。ActivityStack是一个抽象的栈，每个栈都有自己的屏幕区域bound和id，Activity是以Task方式组织并放在某一个Stack中的。所以一个Stack中包含了多个Task，一个Task中包含了多个Activity。关于Stack ID种类代码在/frameworks/base/core/java/android/app/ActivityManager.java的内部类StackId中
 ``` java
 public static class StackId {
     /** Invalid stack ID. */
