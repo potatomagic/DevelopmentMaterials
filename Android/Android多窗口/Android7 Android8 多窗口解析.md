@@ -68,6 +68,7 @@ frameworks/base/services/core/java/com/android/server/wm/WindowManagerService.ja
 frameworks/base/core/java/android/app/ActivityManager.java
 frameworks/base/core/java/android/app/ActivityOptions.java
 frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+frameworks/base/services/core/java/com/android/server/am/ActivityRecord.java
 frameworks/base/services/core/java/com/android/server/am/ActivityStack.java
 frameworks/base/services/core/java/com/android/server/am/ActivityStackSupervisor.java
 frameworks/base/services/core/java/com/android/server/am/LaunchingTaskPositioner.java
@@ -84,6 +85,15 @@ frameworks/base/packages/SystemUI/src/com/android/systemui/stackdivider/
 |--|--|--|
 |Stack|ActivityStack|TaskTack|
 |Task|TaskRecord|Task|
+
+
+|||
+|---|---|
+|ActivityRecord|ActivityRecord是Activity在system_server进程中的镜像，Activity实例与ActivityRecord实例一一对应，ActivityRecord用来存储Activity的信息，如所在的进程名称，应用的包名，所在的任务栈的taskAffinity等|
+|Task|Task表示任务栈，用于记录activity开启的先后顺序|
+|ActivityStack|ActivityStack维护的是TaskRecord的列表，并且该列表不是栈结构|
+|ActivityStackSupervisor|用来管理ActivityStack的，内部有两个不同的ActivityStack对象：mHomeStack、mFocusedStack，用来管理不同的任务。|
+
 
 ### 自由模式
 自由模式默认情况下是关闭的。如果需要打开，以下两种方式选择其一即可。
