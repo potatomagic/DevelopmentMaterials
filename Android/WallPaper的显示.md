@@ -1,5 +1,5 @@
 # Android壁纸
-在Android中，壁纸分为静态与动态两种。静态壁纸是一张图片，而动态壁纸则以动画为表现形式，或者可以对用户的操作作出反应。这两种形式看似差异很大，其实二者的本质是统一的。它们都以一个Service的形式运行在系统后台，并在一个类型为TYPE_WALLPAPER的窗口上绘制内容。本篇代码部分主要以Android8.1为主，其他Android版本也大同小异。
+在Android中，壁纸分为静态与动态两种。静态壁纸是一张图片，而动态壁纸则以动画为表现形式，或者可以对用户的操作作出反应。这两种形式看似差异很大，其实二者的本质是统一的。它们都以一个Service的形式运行在系统后台，并在一个类型为TYPE_WALLPAPER的窗口上绘制内容。本篇代码部分主要以Android8.1为主，Android其他版本在代码上也大同小异。
 
 # 涉及的源代码
 ```shell
@@ -112,7 +112,7 @@ class DrawableEngine extends Engine {
         if (mBackgroundWidth <= 0 || mBackgroundHeight <= 0) {
             // Need to load the image to get dimensions
             mWallpaperManager.forgetLoadedWallpaper();
-            loadWallpaper(forDraw);
+            loadWallpaper(forDraw, false /* needsReset */);
             hasWallpaper = false;
         }
         // Force the wallpaper to cover the screen in both dimensions
@@ -203,13 +203,13 @@ class DrawableEngine extends Engine {
 ```
 FIXED_SIZED_SURFACE值如果配置为true则采用最大尺寸设置为壁纸surface的尺寸即图片大就用图片的尺寸，屏幕分辨率大就使用屏幕的尺寸。所以如果图片大就可以滑动桌面时壁纸随着移动。如果配置为false则以屏幕视图尺寸为准。图片大的话会遭到剪切，即使图片大也不会随着桌面滑动。
 
-DrawableEngine在初始化时调用了updateSurfaceSize()方法。而在updateSurfaceSize()方法中，初始情况下，mBackgroundWidth和mBackgroundHeight的值都是-1，这时候需要进行loadWallpaper()方法。loadWallpaper()方法主要是通过异步AsyncTask调用mWallpaperManager.getBitmap()去获取壁纸资源，并且一次获取失败就会再去获取一遍，如果还是没有得到就只好返回null。当正常得到了图片资源后会重新调用updateSurfaceSize()方法对长宽尺寸进行简单调整后，调用drawFrame()方法进行壁纸的渲染，渲染的方式有两种，一种是OpenGL，一种是Canvas。渲染静态图片原理就不在这里赘述了。
+DrawableEngine在初始化时调用了updateSurfaceSize()方法。而在updateSurfaceSize()方法中，初始情况下，mBackgroundWidth和mBackgroundHeight的值都是-1，这时候需要进行loadWallpaper()方法。loadWallpaper()方法主要是通过异步AsyncTask调用mWallpaperManager.getBitmap()去获取壁纸资源，并且一次获取失败就会再去获取一遍，如果还是没有得到就只好返回null。当正常得到了图片资源后会重新调用updateSurfaceSize()方法对长宽尺寸进行简单调整后，调用drawFrame()方法进行壁纸的渲染，渲染的方式有两种，一种是OpenGL，一种是Canvas，渲染静态图片原理就不在这里赘述了。
 
 ## 壁纸重要文件信息
 - /data/system/users/{userid}/wallpaper_info.xml
 - /data/system/users/{userid}/wallpaper
 
-通常情况下，{userid}是0。这两个壁纸信息配置在WallpaperManagerService中，
+通常情况下，{userid}是0。这两个壁纸信息文件配置在WallpaperManagerService中，代码如下
 ```java
 frameworks/base/services/java/com/android/server/WallpaperManagerService.java
 static final String WALLPAPER_CROP = "wallpaper";
@@ -253,8 +253,6 @@ WallpaperManager作为一个应用可以获取的服务，主要方法如下，�
 |getDrawable()|获得当前系统壁纸，如果没有设置壁纸，则返回系统默认壁纸|
 |getWallpaperInfo()|加入当前壁纸是动态壁纸，返回动态壁纸信息，否则返回null|
 |peekDrawable()|获得当前系统壁纸，如果没设置壁纸的话返回null|
-
-
 
 ## 总结
 Android系统壁纸主要分成三部分
