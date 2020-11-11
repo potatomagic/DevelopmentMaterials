@@ -1,0 +1,14 @@
+FFmpeg命令
+- 基本信息查询命令
+- 录制命令
+  - ffmpeg -f gdigrab -framerate 30 -offset_x 0 -offset_y 0 -video_size 1920x1080 -i desktop out.mpg
+    - -f gdigrab: 表示通过gdi抓屏的方式 （mac下 avfoundation）
+    - -framerate 30: 表示录制的帧率为30
+    - -offset_x 0: 左上偏移量 X
+    - -offset_y 0: 左上偏移量 Y
+    - -video_size 1920x1080: 录制的宽度和高度
+    - -i desktop out.mpg: 输入路径和名称，desktop表示整个屏幕，而不是一个窗口，录制窗口需要用窗口ID
+- 处理原始数据命令
+- 裁剪与合并命令
+- 直播命令
+- 滤镜命令
