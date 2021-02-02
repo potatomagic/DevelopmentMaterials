@@ -12,7 +12,7 @@ The application could not be installed: INSTALL_FAILED_SHARED_USER_INCOMPATIBLE
 ### 模拟器选择
 想要让打了系统签名后的App能正常运行到 Android Studio 的模拟器中，首先要确保模拟器不是带 Google APIs 的。打开AVD我们可以看到：
 
-![AVD](.\img\avd.png)
+![AVD](./img/avd.png)
 
 如图上所示， 可以看到target那里，有的后面有个(Google APIs)。 像这种就不行， 即使你弄了对应的平台签名也无法安装上去。因为这种带 Google APIs 的， 用的系统签名和你在 AOSP 找的 platform.pk8 和 platform.x509.pem 文件生成的系统签名是不一样的。
 
@@ -44,10 +44,10 @@ The application could not be installed: INSTALL_FAILED_SHARED_USER_INCOMPATIBLE
 ### Android Studio 配置系统签名
 File ---> Project Structure ---> Modules ---> Signing Configs 中新建一条签名的信息，包含签名的路径，签名的账户密码。
 
-![Signing Configs](.\img\signing_configs.png)
+![Signing Configs](./img/signing_configs.png)
 
 然后在 Project Structure ---> Build Variants ---> Build Types 中设置  Signing Configs 的值，保存即可。
 
-![Build Variants](.\img\build_variants.png)
+![Build Variants](./img/build_variants.png)
 
 配置完成后，我们可以在 build.gradle 中看到相应的 signingConfig 配置，这样就使 System App 可以直接运 Android Studio 模拟器中了。
