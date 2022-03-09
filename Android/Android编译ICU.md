@@ -9,12 +9,12 @@ ICU的官方地址是：http://site.icu-project.org/
 在Android中，ICU的地址是 external/icu/icu4c/source/，修改完成后需要在该目录下编译并且替换icudtXXX.dat文件。具体步骤如下：
 ``` shell
 执行icuConfigureRun命令，生成make文件:
-~/android/external/icu/icu4c/source/# ./runConfigureICU Linux
+~/android/external/icu/icu4c/source/$ ./runConfigureICU Linux
 执行make命令：
-~/android/external/icu/icu4c/source/# make INCLUDE_UNI_CORE_DATA=1
+~/android/external/icu/icu4c/source/$ make INCLUDE_UNI_CORE_DATA=1
 替换dat文件：
-~/android/external/icu/icu4c/source/# cp -rf data/out/tmp/icudt58l.dat stubdata/
+~/android/external/icu/icu4c/source/$ cp -rf data/out/tmp/icudt58l.dat stubdata/
 生成新的系统镜像：
-~/android/# make clean
-~/android/# make -j8
+~/android/$ make clean
+~/android/$ make -j8
 ```
